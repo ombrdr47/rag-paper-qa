@@ -1,0 +1,11 @@
+include README.md
+include QUICKSTART.md
+include requirements.txt
+include .env.example
+recursive-include data *.pdf
+exclude *.log
+exclude .DS_Store
+prune vector_store
+prune chat_sessions
+prune venv
+prune __pycache__
