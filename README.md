@@ -1,6 +1,6 @@
 # Research Paper Q&A Agent
 
-A production-ready RAG (Retrieval-Augmented Generation) system built with LangChain for intelligent question-answering on research papers. Features conversational memory, multi-session chat management, and structure-aware PDF parsing.
+A RAG (Retrieval-Augmented Generation) system built with LangChain for intelligent question-answering on research papers. Features conversational memory, multi-session chat management, and structure-aware PDF parsing.
 
 ## Architecture
 
@@ -130,7 +130,8 @@ A production-ready RAG (Retrieval-Augmented Generation) system built with LangCh
 
 1. **Clone/Download the repository**
    ```bash
-   cd nonsense
+   git clone https://github.com/ombrdr47/rag-paper-qa
+   cd rag-paper-qa
    ```
 
 2. **Create virtual environment**
@@ -253,59 +254,7 @@ AI: [Contextual answer...]
 └── chat_sessions/         # Saved conversation history (JSON)
 ```
 
-## Performance Characteristics
 
-- **PDF Parsing**: ~2-5 seconds for typical research paper
-- **Embedding Generation**: ~5-10 seconds for 80 chunks (local)
-- **Query Response**: ~3-5 seconds (including retrieval + generation)
-- **Chat History**: Last 2 Q&A pairs maintained for context
-- **Batch Processing**: 20 documents/batch, 0.1s delays
 
-## Design Decisions
-
-### Why HuggingFace Embeddings?
-- **No API quotas**: Unlimited local processing
-- **Fast**: Runs on Apple Silicon (MPS) or CPU
-- **Cost-effective**: No per-request charges
-- **Quality**: `all-MiniLM-L6-v2` provides strong semantic understanding
-- **Privacy**: All processing stays local
-
-### Why FAISS?
-- **Speed**: Optimized for similarity search
-- **Scalability**: Handles thousands of documents
-- **Local**: No external dependencies
-- **Persistence**: Easy save/load from disk
-- **Production-ready**: Battle-tested by Facebook AI
-
-### Why Conversational Context?
-- **Natural UX**: Users ask follow-up questions naturally
-- **Context Awareness**: System understands pronouns and references
-- **Efficiency**: Simple context injection vs. complex query rewriting
-- **Performance**: No extra LLM calls for condensing questions
-- **Memory Efficient**: Only last 2 Q&A pairs stored
-
-### Why Modular Architecture?
-- **Separation of Concerns**: Each module has a single responsibility
-- **Testability**: Easy to unit test individual components
-- **Maintainability**: Clear code organization
-- **Extensibility**: Easy to add new features or swap components
-- **Error Handling**: Custom exceptions for precise debugging
-
-## Logging
-
-- **Console**: ERROR level only (clean output)
-- **File**: DEBUG level in `research_paper_agent.log`
-- **Purpose**: Debugging without cluttering terminal
-
-## Future Enhancements
-
-- Multi-paper querying across corpus
-- Citation extraction and linking
-- Export conversations to Markdown
-- Web UI (Streamlit/Gradio)
-- Support for arXiv direct download
-- Comparative analysis between papers
-
----
 
 **Built with LangChain | Powered by Google Gemini & HuggingFace**
