@@ -246,7 +246,6 @@ AI: [Contextual answer...]
 ├── logger.py               # Centralized logging setup
 ├── exceptions.py           # Custom exception types
 ├── __init__.py             # Package initialization
-├── setup.py                # Package installation config
 ├── requirements.txt        # Python dependencies
 ├── .env.example           # Environment configuration template
 ├── data/                  # Research papers (PDF files)
