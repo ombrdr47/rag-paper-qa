@@ -58,10 +58,11 @@ A RAG (Retrieval-Augmented Generation) system built with LangChain for intellige
 - **Purpose**: Retrieval-Augmented Generation for accurate Q&A
 - **Features**:
   - **Multiple Retrieval Strategies**:
-    - Similarity search (default)
-    - Maximum Marginal Relevance (MMR)
-    - Contextual compression
-    - Multi-query retrieval
+    - Similarity search (default) - Dense vector similarity
+    - Maximum Marginal Relevance (MMR) - Diversity-aware retrieval
+    - Contextual compression - Context-aware filtering
+    - Multi-query retrieval - Query expansion
+    - **Hybrid search (NEW)** - BM25 + Dense embeddings with RRF
   - **Conversational Context**: Maintains chat history for follow-up questions
   - **Specialized Queries**: Summary, methodology, results extraction
 - **Technology**: LangChain + Google Gemini LLM
@@ -77,7 +78,20 @@ A RAG (Retrieval-Augmented Generation) system built with LangChain for intellige
 - **Storage**: File-based with automatic timestamps
 - **Error Handling**: Custom `ChatSessionError` exceptions
 
-#### 5. **Main Application** (`main.py`)
+#### 5. **Hybrid Retriever** (`hybrid_retriever.py`) ⭐ NEW
+- **Purpose**: retrieval combining lexical and semantic search
+- **Algorithm**: Reciprocal Rank Fusion (RRF)
+- **Components**:
+  - **BM25 Retriever**: Keyword/term matching (sparse retrieval)
+  - **Dense Retriever**: Semantic similarity (FAISS vector search)
+  - **RRF Scoring**: `score = bm25_weight/(rank+60) + dense_weight/(rank+60)`
+- **Benefits**:
+  - Captures exact keyword matches (BM25)
+  - Understands semantic meaning (dense embeddings)
+  - Handles both technical terms and conceptual queries
+- **Configuration**: Adjustable weights (default: 0.5/0.5)
+
+#### 6. **Main Application** (`main.py`)
 - **Purpose**: CLI interface and orchestration
 - **Modes**:
   - **Single Query**: `python main.py <pdf> -q "question"`
@@ -86,9 +100,10 @@ A RAG (Retrieval-Augmented Generation) system built with LangChain for intellige
   - Session management UI
   - Source attribution toggle
   - Special commands (summary, methodology, etc.)
+  - Multiple retrieval strategies via `--strategy` flag
   - Comprehensive error handling
 
-#### 6. **Configuration System** (`config.py`, `logger.py`, `exceptions.py`)
+#### 7. **Configuration System** (`config.py`, `logger.py`, `exceptions.py`)
 - **config.py**: Centralized constants and default values
 - **logger.py**: Structured logging with file/console handlers
 - **exceptions.py**: Custom exception hierarchy for precise error handling
@@ -100,6 +115,11 @@ A RAG (Retrieval-Augmented Generation) system built with LangChain for intellige
 - **Model**: `sentence-transformers/all-MiniLM-L6-v2`
 - **Dimensions**: 384
 - **Advantage**: Runs on local hardware (CPU/MPS), fast inference
+
+### Retrieval
+- **Dense Search**: FAISS vector similarity (semantic)
+- **Sparse Search**: BM25 algorithm (keyword matching via `rank-bm25`)
+- **Hybrid**: Reciprocal Rank Fusion combining both
 
 ### LLM
 - **Provider**: Google Gemini
@@ -188,6 +208,29 @@ This will:
 python main.py data/paper.pdf -q "What is the main contribution?"
 ```
 
+### Retrieval Strategies
+
+```bash
+# Use hybrid search (BM25 + dense embeddings)
+python main.py --load --strategy hybrid -q "What is attention?"
+
+# Use MMR for diverse results
+python main.py --load --strategy mmr -q "Explain the methodology"
+
+# Use contextual compression
+python main.py --load --strategy compression -q "What are the results?"
+
+# Use multi-query for comprehensive answers
+python main.py --load --strategy multi_query -q "How does it work?"
+```
+
+**Available Strategies:**
+- `similarity` - Dense vector search (default)
+- `mmr` - Maximum Marginal Relevance for diversity
+- `compression` - Contextual compression filtering
+- `multi_query` - Expands single query to multiple perspectives
+- `hybrid` - Combines BM25 (keyword) + dense (semantic) with Reciprocal Rank Fusion
+
 ### Interactive Chat Mode
 
 ```bash
@@ -241,12 +284,13 @@ AI: [Contextual answer...]
 ├── pdf_parser.py           # Structure-aware PDF parsing
 ├── data_ingestion.py       # Embedding generation & vector store
 ├── rag_system.py           # RAG with multiple retrieval strategies
+├── hybrid_retriever.py     # Hybrid search (BM25 + Dense) ⭐ NEW
 ├── chat_manager.py         # Session management & persistence
 ├── config.py               # Configuration constants
 ├── logger.py               # Centralized logging setup
 ├── exceptions.py           # Custom exception types
 ├── __init__.py             # Package initialization
-├── requirements.txt        # Python dependencies
+├── requirements.txt        # Python dependencies (includes rank-bm25)
 ├── .env.example           # Environment configuration template
 ├── data/                  # Research papers (PDF files)
 ├── vector_store/          # FAISS index & metadata
