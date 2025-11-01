@@ -438,7 +438,7 @@ def main():
     )
     parser.add_argument(
         "--strategy",
-        choices=["similarity", "mmr", "compression", "multi_query"],
+        choices=["similarity", "mmr", "compression", "multi_query", "hybrid"],
         default="similarity",
         help="Retrieval strategy (default: similarity)"
     )

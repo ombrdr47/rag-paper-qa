@@ -393,6 +393,15 @@ class ResearchPaperIngestionPipeline:
                     allow_dangerous_deserialization=True
                 )
                 logger.info("Successfully loaded FAISS vector store")
+                
+                # Extract documents from vector store for hybrid retrieval
+                if hasattr(self.vector_store, 'docstore') and hasattr(self.vector_store.docstore, '_dict'):
+                    self.documents = list(self.vector_store.docstore._dict.values())
+                    logger.info(f"Extracted {len(self.documents)} documents from vector store")
+                else:
+                    logger.warning("Could not extract documents from vector store")
+                    self.documents = None
+                    
             elif self.vector_store_type == "chroma":
                 logger.error("Chroma is not installed. Please install chromadb or use 'faiss' instead.")
                 raise ValueError("Chroma vector store requires 'pip install chromadb'")
