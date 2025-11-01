@@ -37,3 +37,4 @@ tiktoken
 
 # Visualization and Analysis (optional)
 matplotlib
+rank-bm25
