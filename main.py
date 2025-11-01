@@ -174,8 +174,12 @@ class ResearchPaperAgent:
         if vector_store is None:
             raise ValueError("Vector store not initialized. Please ingest a paper first.")
         
+        # Get documents for hybrid retrieval
+        documents = self.ingestion_pipeline.get_documents()
+        
         self.rag_system = ResearchPaperRAG(
             vector_store=vector_store,
+            documents=documents,
             model_name=self.llm_model,
             temperature=self.temperature,
             retrieval_strategy=self.retrieval_strategy,

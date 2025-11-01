@@ -232,7 +232,7 @@ class ResearchPaperIngestionPipeline:
         if embedding_provider.lower() == "huggingface":
             from langchain_huggingface import HuggingFaceEmbeddings
             self.embeddings = HuggingFaceEmbeddings(model_name=embedding_model)
-            logger.info("HuggingFace Embeddings initialized (local, no API needed)")
+            logger.info("HuggingFace Embeddings initialized ")
         elif embedding_provider.lower() == "google":
             from langchain_google_genai import GoogleGenerativeAIEmbeddings
             self.embeddings = GoogleGenerativeAIEmbeddings(model=embedding_model)
@@ -251,6 +251,7 @@ class ResearchPaperIngestionPipeline:
         
         self.vector_store = None
         self.paper = None
+        self.documents = None  # Store documents for hybrid retrieval
         logger.info("="*80)
     
     def ingest_paper(self, pdf_path: str) -> Dict[str, Any]:
@@ -286,6 +287,7 @@ class ResearchPaperIngestionPipeline:
         logger.info("Step 2/3: Creating document chunks")
         try:
             documents = self.text_splitter.split_sections(self.paper)
+            self.documents = documents  # Store for hybrid retrieval
             logger.info(f"Created {len(documents)} document chunks")
             
             # Log chunk type distribution
@@ -405,6 +407,10 @@ class ResearchPaperIngestionPipeline:
     def get_vector_store(self):
         """Get the vector store instance"""
         return self.vector_store
+    
+    def get_documents(self) -> Optional[List[Document]]:
+        """Get the list of documents for hybrid retrieval"""
+        return self.documents
     
     def get_paper_info(self) -> Optional[Dict[str, Any]]:
         """Get information about the ingested paper"""

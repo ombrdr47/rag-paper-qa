@@ -23,6 +23,8 @@ from langchain_classic.retrievers.multi_query import MultiQueryRetriever
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
+from hybrid_retriever import create_hybrid_retriever
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -71,7 +73,8 @@ Standalone Question:"""
     def __init__(
         self,
         vector_store,
-        model_name: str = "gemini-pro",
+        documents: List[Document] = None,
+        model_name: str = "gemini-2.5-pro",
         temperature: float = 0.0,
         retrieval_strategy: str = "similarity",
         top_k: int = 5
@@ -81,9 +84,10 @@ Standalone Question:"""
         
         Args:
             vector_store: Vector store instance (FAISS or Chroma)
+            documents: List of Document objects (required for hybrid retrieval)
             model_name: Google Gemini model name
             temperature: Temperature for generation (0 = deterministic)
-            retrieval_strategy: Strategy for retrieval ('similarity', 'mmr', 'compression', 'multi_query')
+            retrieval_strategy: Strategy for retrieval ('similarity', 'mmr', 'compression', 'multi_query', 'hybrid')
             top_k: Number of documents to retrieve
         """
         logger.info("="*80)
@@ -95,6 +99,7 @@ Standalone Question:"""
         logger.info(f"Top K Documents: {top_k}")
         
         self.vector_store = vector_store
+        self.documents = documents
         self.llm = ChatGoogleGenerativeAI(model=model_name, temperature=temperature)
         logger.info("Google Gemini LLM initialized")
         
@@ -163,6 +168,22 @@ Standalone Question:"""
                 llm=self.llm
             )
             logger.info(f"Multi-query retriever created (top_k={self.top_k})")
+        
+        elif self.retrieval_strategy == "hybrid":
+            # Hybrid retrieval - BM25 + Dense embeddings
+            if self.documents is None:
+                logger.error("Hybrid retrieval requires documents list")
+                raise ValueError("documents parameter is required for hybrid retrieval strategy")
+            
+            logger.info("Setting up hybrid retriever (BM25 + Dense)...")
+            retriever = create_hybrid_retriever(
+                vector_store=self.vector_store,
+                documents=self.documents,
+                bm25_weight=0.5,
+                dense_weight=0.5,
+                k=self.top_k
+            )
+            logger.info(f"Hybrid retriever created (top_k={self.top_k})")
         
         else:
             logger.error(f"Unknown retrieval strategy: {self.retrieval_strategy}")
